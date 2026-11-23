@@ -298,8 +298,8 @@ img.mirror { transform: scaleX(-1); }
 .cam-btn.danger { color: var(--bad); }
 .cam-frame { position: relative; width: 100%; max-width: 560px; margin: 0 auto; aspect-ratio: 3 / 4; max-height: 64vh; overflow: hidden; background: #111; }
 .cam-frame video, .cam-ghost, .cam-review { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cam-frame video.mirror { transform: scaleX(-1); }
-.cam-ghost { pointer-events: none; transition: opacity 0.15s; }
+.cam-frame video.mirror { transform: scaleX(-1) translateZ(0); -webkit-transform: scaleX(-1) translateZ(0); }
+.cam-ghost { pointer-events: none; }
 .cam-review { display: none; }
 .cam.reviewing .cam-review { display: block; }
 .cam.reviewing .cam-guides, .cam.reviewing .cam-ghost-ctl { display: none; }

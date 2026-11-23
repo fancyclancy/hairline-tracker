@@ -39,11 +39,12 @@ function captureAngle(angle, index, total) {
     const ghost = store.latestPhoto(angle);
     let facing = pref.get(`facing:${angle}`, 'user');
     let timer = pref.get(`timer:${angle}`, angle === 'crown' ? 10 : 0);
-    let ghostOpacity = pref.get('ghostOpacity', 0.35);
+    let ghostOpacity = pref.get('ghostOpacity', 0.3);
     let ghostOn = !!ghost;
     let stream = null;
     let countdown = null;
     let captured = null; // canvas in review
+    let noFrameTimer = null;
 
     const root = el(`
       <div class="cam">
@@ -94,7 +95,10 @@ function captureAngle(angle, index, total) {
     const paint = () => {
       root.querySelector('[data-act=timer]').textContent = timer ? `⏱ ${timer}s` : '⏱ Off';
       root.querySelector('[data-act=ghost]').textContent = ghostOn ? 'Ghost on' : 'Ghost off';
-      ghostImg.style.opacity = ghostOn && !captured ? ghostOpacity : 0;
+      // When the ghost is off (or at 0%), remove the overlay entirely so the live camera is never covered.
+      const showGhost = ghostOn && !captured && ghostOpacity > 0;
+      ghostImg.hidden = !showGhost;
+      ghostImg.style.opacity = ghostOpacity;
       video.classList.toggle('mirror', facing === 'user');
       root.classList.toggle('reviewing', !!captured);
     };
@@ -108,8 +112,16 @@ function captureAngle(angle, index, total) {
           audio: false,
           video: { facingMode: { ideal: facing }, width: { ideal: 1440 }, height: { ideal: 1920 } },
         });
+        video.muted = true;
         video.srcObject = stream;
         await video.play().catch(() => {});
+        // If no frames arrive, say so and offer a restart instead of showing a silent black screen.
+        clearTimeout(noFrameTimer);
+        noFrameTimer = setTimeout(() => {
+          if (!captured && !video.videoWidth) {
+            msgEl.innerHTML = '<p>The camera isn’t showing yet.</p><button class="btn primary" data-act="restart">Restart camera</button>';
+          }
+        }, 4000);
       } catch (e) {
         showFallback(e.name === 'NotAllowedError'
           ? 'Camera permission was denied. Allow it in Settings › Safari › Camera, or use the iPhone camera instead.'
@@ -165,6 +177,7 @@ function captureAngle(angle, index, total) {
       if (act === 'retake') { captured = null; reviewImg.removeAttribute('src'); paint(); }
       if (act === 'mirror') review(flipCanvas(captured));
       if (act === 'use') finish(captured);
+      if (act === 'restart') startStream();
       if (act === 'native') {
         const [file] = await pickFiles({ capture: facing });
         if (!file) return;
@@ -172,7 +185,7 @@ function captureAngle(angle, index, total) {
         catch (err) { toast(err.message); }
       }
     });
-    slider.addEventListener('input', () => { ghostOpacity = Number(slider.value); ghostOn = true; pref.set('ghostOpacity', ghostOpacity); paint(); });
+    slider.addEventListener('input', () => { ghostOpacity = Number(slider.value); ghostOn = ghostOpacity > 0; pref.set('ghostOpacity', ghostOpacity); paint(); });
 
     paint();
     startStream();
