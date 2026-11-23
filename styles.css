@@ -296,13 +296,19 @@ img.mirror { transform: scaleX(-1); }
 .cam-btn-spacer { background: none; }
 .cam-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .cam-btn.danger { color: var(--bad); }
-.cam-frame { position: relative; width: 100%; max-width: 560px; margin: 0 auto; aspect-ratio: 3 / 4; max-height: 64vh; overflow: hidden; background: #111; }
-.cam-frame video, .cam-ghost, .cam-review { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cam-frame video.mirror { transform: scaleX(-1) translateZ(0); -webkit-transform: scaleX(-1) translateZ(0); }
-.cam-ghost { pointer-events: none; }
-.cam-review { display: none; }
-.cam.reviewing .cam-review { display: block; }
-.cam.reviewing .cam-guides, .cam.reviewing .cam-ghost-ctl { display: none; }
+/* Always exactly 3:4, so the canvas preview matches the saved photo. */
+.cam-frame { position: relative; width: min(100%, 560px, calc(60vh * 0.75)); margin: 0 auto; aspect-ratio: 3 / 4; overflow: hidden; background: #111; flex: none; }
+/* The video only feeds the canvas; the canvas (camera + ghost in one picture) is what you see. */
+.cam-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cam-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.cam.reviewing .cam-guides { display: none; }
+.cam-review-row { display: flex; gap: 10px; justify-content: center; width: 100%; }
+.cam-review-row .cam-pill { flex: 1; min-width: 0; }
+.cam-use { width: 100%; }
+.viewer-actions { display: flex; justify-content: center; padding: 12px 20px 0; }
+.viewer-actions .btn { width: 100%; max-width: 360px; }
+.cam-native { display: block; margin: 10px auto 0; color: var(--muted); font-size: 13px; text-decoration: underline; padding: 4px 8px; }
+.cam.reviewing .cam-native { display: none; }
 .cam-guides { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; fill: none; stroke: rgba(255, 255, 255, 0.55); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
 .cam-guides .dash { stroke-dasharray: 6 6; }
 .cam-guides .faint { stroke: rgba(255, 255, 255, 0.2); }
@@ -316,7 +322,7 @@ img.mirror { transform: scaleX(-1); }
 .cam-controls { margin-top: auto; display: flex; align-items: center; justify-content: space-around; padding: 12px 16px 0; gap: 10px; }
 .cam .cam-controls.review { display: none; }
 .cam.reviewing .cam-controls.live { display: none; }
-.cam.reviewing .cam-controls.review { display: flex; }
+.cam.reviewing .cam-controls.review { display: flex; flex-direction: column; padding: 12px 20px 0; }
 .cam-pill { min-width: 92px; height: 40px; padding: 0 14px; border-radius: 20px; background: rgba(255, 255, 255, 0.14); font-weight: 600; font-size: 14px; }
 .shutter { width: 76px; height: 76px; border-radius: 50%; border: 4px solid #fff; display: grid; place-items: center; flex: none; }
 .shutter span { width: 60px; height: 60px; border-radius: 50%; background: #fff; transition: transform 0.1s; }

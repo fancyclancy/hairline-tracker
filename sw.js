@@ -1,6 +1,6 @@
 // Network-first service worker: always tries to fetch the latest version,
 // falls back to the cached copy when offline.
-const CACHE = 'hairline-v1';
+const CACHE = 'hairline-v2';
 const SHELL = [
   './',
   'index.html',
@@ -34,7 +34,8 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
-    fetch(req)
+    // 'no-cache' revalidates with the server every time, so a new version reaches the phone on the next open.
+    fetch(req, { cache: 'no-cache' })
       .then((res) => {
         if (res.ok) {
           const copy = res.clone();

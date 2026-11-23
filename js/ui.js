@@ -160,7 +160,18 @@ export async function shareOrDownload(blob, filename) {
   return true;
 }
 
-export const pickFiles = ({ accept = 'image/*', multiple = false, capture } = {}) =>
+/** Share several files at once (iPhone: "Save N Images" puts them in Photos). Falls back to downloads. */
+export async function shareFiles(files) {
+  if (!files.length) return false;
+  if (navigator.canShare && navigator.canShare({ files })) {
+    try { await navigator.share({ files }); return true; }
+    catch (e) { if (e.name === 'AbortError') return false; }
+  }
+  for (const f of files) await shareOrDownload(f, f.name);
+  return true;
+}
+
+export const pickFiles =({ accept = 'image/*', multiple = false, capture } = {}) =>
   new Promise((resolve) => {
     const input = document.createElement('input');
     input.type = 'file';

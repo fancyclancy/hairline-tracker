@@ -1,11 +1,11 @@
 // App shell: tab routing plus the Today, Calendar and Settings screens.
 import * as store from './store.js';
-import { ANGLES, el, esc, toast, confirmDialog, shareOrDownload, pickFiles, router } from './ui.js';
+import { ANGLES, el, esc, toast, confirmDialog, shareOrDownload, shareFiles, pickFiles, router } from './ui.js';
 import { todayKey, addDays, fmt, fmtShort, fmtTime, dayNumber, weekNumber, weekLabel, toKey, fromKey, WEEKDAYS } from './dates.js';
 import { startPhotoSession, importPhotos } from './camera.js';
 import { renderProgress } from './progress.js';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 const view = document.getElementById('view');
 const nav = {
   tab: 'today',
@@ -300,6 +300,7 @@ async function renderSettings(v) {
         <button class="btn primary" data-act="export">Export backup</button>
         <button class="btn ghost" data-act="restore">Restore backup</button>
         <button class="btn ghost" data-act="import">Import photos</button>
+        <button class="btn ghost" data-act="to-photos">Save all photos to Photos app</button>
       </div>
     </section>`);
   data.querySelector('.data-count').textContent =
@@ -324,6 +325,10 @@ async function renderSettings(v) {
       } catch (err) { toast(err.message || 'Could not read that file'); }
     }
     if (act === 'import') importPhotos({ onDone: render });
+    if (act === 'to-photos') {
+      if (!store.state.photos.length) return toast('No photos yet');
+      await shareFiles(store.state.photos.map((p) => new File([p.blob], `hairline-${p.date}-${p.angle}.jpg`, { type: 'image/jpeg' })));
+    }
   });
   v.appendChild(data);
 

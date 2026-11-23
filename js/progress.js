@@ -295,6 +295,7 @@ function openViewer(id, view) {
         </button>
       </div>
       <div class="viewer-img"><img src="${photoUrl(p, 'blob')}" alt=""></div>
+      <div class="viewer-actions"><button class="btn ghost" data-act="save">Save to Photos</button></div>
     </div>`);
   document.getElementById('overlay-root').appendChild(root);
   document.body.classList.add('no-scroll');
@@ -302,6 +303,7 @@ function openViewer(id, view) {
   root.addEventListener('click', async (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'close') close();
+    if (act === 'save') shareOrDownload(p.blob, `hairline-${p.date}-${p.angle}.jpg`);
     if (act === 'delete' && await confirmDialog(`Delete this ${ANGLES[p.angle].label.toLowerCase()} photo from ${fmt(p.date)}? This can’t be undone.`, { ok: 'Delete', danger: true })) {
       await store.deletePhoto(p.id);
       close();
