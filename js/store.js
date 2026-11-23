@@ -1,7 +1,7 @@
 // In-memory copy of everything in IndexedDB, plus the calculations the screens need.
 import * as db from './db.js';
 import { addDays, todayKey, weekNumber, weekStart, weekEnd, photoDayOfWeek, weekday } from './dates.js';
-import { forgetPhotoUrls } from './ui.js';
+import { forgetPhotoUrls, ANGLES } from './ui.js';
 
 export const DOSES = [
   { key: 'fin', label: 'Finasteride', icon: '💊', hint: 'Took my pill' },
@@ -20,9 +20,36 @@ const byDate = (a, b) => (a.date === b.date ? a.createdAt.localeCompare(b.create
 
 export async function load() {
   state.settings = await db.getSettings();
+  await migrateSettings();
   state.doses = new Map((await db.getAll('doses')).map((d) => [d.date, d]));
   state.photos = (await db.getAll('photos')).sort(byDate);
   state.impressions = new Map((await db.getAll('impressions')).map((i) => [i.week, i]));
+}
+
+// Saved settings from before front-left/front-right existed: swap 'front' for the two new angles.
+async function migrateSettings() {
+  const s = state.settings;
+  let angles = s.angles.filter((a) => ANGLES[a]);
+  if (!s.splitFront) {
+    angles = angles.flatMap((a) => (a === 'front' ? ['frontLeft', 'frontRight'] : [a]));
+  }
+  angles = Object.keys(ANGLES).filter((a) => angles.includes(a));
+  if (!angles.length) angles = ['frontLeft', 'frontRight', 'crown'];
+  if (!s.splitFront || angles.join() !== s.angles.join()) {
+    state.settings = { ...s, angles, splitFront: true };
+    await db.saveSettings(state.settings);
+  }
+}
+
+/** Angles to show in Progress: the ones being tracked plus any older ones that have photos. */
+export function shownAngles() {
+  const have = new Set(state.photos.map((p) => p.angle));
+  return Object.keys(ANGLES).filter((a) => state.settings.angles.includes(a) || have.has(a));
+}
+/** Angles for one week in the timeline: tracked ones plus any that have a photo that week. */
+export function anglesForWeek(w) {
+  const have = new Set(state.photos.filter((p) => photoWeek(p) === w).map((p) => p.angle));
+  return Object.keys(ANGLES).filter((a) => state.settings.angles.includes(a) || have.has(a));
 }
 
 // ---------- settings ----------

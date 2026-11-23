@@ -1,10 +1,11 @@
 // Shared UI helpers: element builder, toasts, sheets, dialogs, image processing.
 
+// Display order. 'front' (centre) was the original single front angle; it's kept so older photos still show.
 export const ANGLES = {
-  front: { label: 'Front hairline', short: 'Front', tip: 'Face the camera, hair dry and pushed back. Line your eyes up with the dashed line.' },
+  frontLeft: { label: 'Front-left hairline', short: 'Front L', tip: 'Turn your head a little to the right so the left side of your hairline and temple faces the camera. Hair dry and pushed back.' },
+  frontRight: { label: 'Front-right hairline', short: 'Front R', tip: 'Turn your head a little to the left so the right side of your hairline and temple faces the camera. Hair dry and pushed back.' },
+  front: { label: 'Front hairline (centre)', short: 'Front', tip: 'Face the camera, hair dry and pushed back. Line your eyes up with the dashed line.' },
   crown: { label: 'Crown', short: 'Crown', tip: 'Back of the head, hair dry. Use the 10-second timer or ask someone to take it.' },
-  left: { label: 'Left temple', short: 'Left', tip: 'Turn your head right so your left temple faces the camera.' },
-  right: { label: 'Right temple', short: 'Right', tip: 'Turn your head left so your right temple faces the camera.' },
 };
 
 export const RATINGS = [

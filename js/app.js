@@ -5,7 +5,7 @@ import { todayKey, addDays, fmt, fmtShort, fmtTime, dayNumber, weekNumber, weekL
 import { startPhotoSession, importPhotos } from './camera.js';
 import { renderProgress } from './progress.js';
 
-const VERSION = '1.1.0';
+const VERSION = '1.2.0';
 const view = document.getElementById('view');
 const nav = {
   tab: 'today',

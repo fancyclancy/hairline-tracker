@@ -16,8 +16,8 @@ const MILESTONES = [
 const photoLabel = (p) => `${weekLabel(store.photoWeek(p))} · ${fmtShort(p.date)}`;
 
 export function renderProgress(view) {
-  const { settings } = store.state;
-  if (!ui.angle || !settings.angles.includes(ui.angle)) ui.angle = settings.angles[0];
+  const shown = store.shownAngles();
+  if (!ui.angle || !shown.includes(ui.angle)) ui.angle = shown[0];
   const byWeek = store.photosByWeek(ui.angle);
   const weeks = [...byWeek.keys()].sort((x, y) => x - y);
   // Reset to "first vs latest" whenever the set of photo weeks changes (new photos, new angle).
@@ -36,8 +36,8 @@ export function renderProgress(view) {
       <div class="sub">Day ${Math.max(0, dayNumber(store.start(), todayKey()))} on fin + min</div>
     </div></header>`));
 
-  if (settings.angles.length > 1) {
-    const seg = el(`<div class="seg">${settings.angles.map((a) => `<button data-angle="${a}" class="${a === ui.angle ? 'on' : ''}">${esc(ANGLES[a].short)}</button>`).join('')}</div>`);
+  if (shown.length > 1) {
+    const seg = el(`<div class="seg">${shown.map((a) => `<button data-angle="${a}" class="${a === ui.angle ? 'on' : ''}">${esc(ANGLES[a].short)}</button>`).join('')}</div>`);
     seg.addEventListener('click', (e) => { const a = e.target.closest('button')?.dataset.angle; if (a) { ui.angle = a; ui.a = ui.b = null; renderProgress(view); } });
     view.appendChild(seg);
   }
@@ -234,12 +234,11 @@ function trendCard() {
 
 // ---------- weekly timeline ----------
 function timeline(view) {
-  const { settings } = store.state;
   const s = store.start();
   const cw = store.currentWeek();
   const wrap = el('<section class="timeline"><h2 class="section-title">Week by week</h2></section>');
   if (cw < 1) { wrap.appendChild(el('<p class="muted">Your timeline starts on your start date.</p>')); return wrap; }
-  const maps = Object.fromEntries(settings.angles.map((a) => [a, store.photosByWeek(a)]));
+  const maps = Object.fromEntries(Object.keys(ANGLES).map((a) => [a, store.photosByWeek(a)]));
 
   for (let w = cw; w >= 1; w--) {
     const ad = store.weekAdherence(w);
@@ -254,7 +253,7 @@ function timeline(view) {
           <span class="muted small">${esc(fmtShort(weekStart(s, w)))} – ${esc(fmtShort(weekEnd(s, w)))}</span>
         </div>
         <div class="week-photos">
-          ${settings.angles.map((a) => {
+          ${store.anglesForWeek(w).map((a) => {
             const p = maps[a].get(w);
             return p
               ? `<button class="thumb" data-photo="${p.id}"><img src="${photoUrl(p)}" alt=""><span>${esc(ANGLES[a].short)}</span></button>`

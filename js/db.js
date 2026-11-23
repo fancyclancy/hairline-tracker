@@ -43,7 +43,7 @@ export const clear = (store) => run(store, 'readwrite', (s) => s.clear());
 export const DEFAULT_SETTINGS = {
   startDate: '2026-11-14',
   photoWeekday: 0, // Sunday
-  angles: ['front', 'crown'],
+  angles: ['frontLeft', 'frontRight', 'crown'],
 };
 
 export async function getSettings() {
